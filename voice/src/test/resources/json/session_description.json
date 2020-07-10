@@ -1,0 +1,7 @@
+{
+  "op": 4,
+  "d": {
+    "mode": "xsalsa20_poly1305_lite",
+    "secret_key": [251, 100, 11]
+  }
+}
