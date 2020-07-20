@@ -1,5 +1,8 @@
 import dev.kord.voice.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.json
+import kotlinx.serialization.stringify
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,10 +14,15 @@ private fun file(name: String): String {
 class SerializationTest {
     @Test
     fun `heartbeat serializes correctly`() {
-        val json = Json.parse(VoiceEvent, file("heartbeat"))
-        with(json as VoiceHeartbeat) {
-            assertEquals(1501184119561, data)
-        }
+        val heartbeat = Json.stringify(VoiceCommand, VoiceCommand.Heartbeat(1501184119561))
+        val json = Json.stringify(JsonObject.serializer(), json {
+
+            "op" to VoiceOpCode.Heartbeat.code
+            "d" to 1501184119561
+
+        })
+
+        assertEquals(json, heartbeat)
     }
 
     @Test
@@ -36,13 +44,25 @@ class SerializationTest {
 
     @Test
     fun `protocol selection serializes correctly`() {
-        val json = Json.parse(VoiceEvent, file("protocol_selection"))
-        with(json as SelectProtocol) {
-            assertEquals("udp", protocol)
-            assertEquals("127.0.0.1", data.address)
-            assertEquals(1337, data.port)
-            assertEquals("xsalsa20_poly1305_lite", data.mode)
-        }
+        val protocol = Json.stringify(
+                VoiceCommand,
+                VoiceCommand.SelectProtocol(
+                        "udp",
+                        VoiceCommand.SelectProtocolData("127.0.0.1", 1337, "xsalsa20_poly1305_lite")
+                ))
+        val json = Json.stringify(JsonObject.serializer(), json {
+            "op" to VoiceOpCode.SelectProtocol.code
+            "d" to json {
+                "protocol" to "udp"
+                "data" to json {
+                    "address" to "127.0.0.1"
+                    "port" to 1337
+                    "mode" to "xsalsa20_poly1305_lite"
+                }
+            }
+        })
+
+        assertEquals(json, protocol)
     }
 
     @Test
@@ -69,5 +89,31 @@ class SerializationTest {
             assertEquals("xsalsa20_poly1305_lite", mode)
             assertEquals(listOf(251, 100, 11), secretKey)
         }
+    }
+
+    @Test
+    fun `identify serializes correctly`() {
+        val identify = Json.stringify(
+                VoiceCommand,
+                VoiceCommand.Identify(
+                        "41771983423143937",
+                        "104694319306248192",
+                        "my_session_id",
+                        "my_token"
+                )
+
+        )
+
+        val json = Json.stringify(JsonObject.serializer(), json {
+            "op" to VoiceOpCode.Identify.code
+            "d" to json {
+                "server_id" to "41771983423143937"
+                "user_id" to "104694319306248192"
+                "session_id" to "my_session_id"
+                "token" to "my_token"
+            }
+        })
+
+        assertEquals(json, identify)
     }
 }

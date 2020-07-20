@@ -28,12 +28,8 @@ sealed class VoiceEvent {
                         1 -> data = when (op) {
                             VoiceOpCode.Hello -> decodeSerializableElement(descriptor, index, VoiceHello.serializer())
                             VoiceOpCode.Ready -> decodeSerializableElement(descriptor, index, VoiceReady.serializer())
-                            VoiceOpCode.Identify -> decodeSerializableElement(descriptor, index, VoiceIdentify.serializer())
-                            VoiceOpCode.Heartbeat -> decodeSerializableElement(descriptor, index, VoiceHeartbeat.serializer())
                             VoiceOpCode.HearbeatACK -> decodeSerializableElement(descriptor, index, VoiceHeartbeatACK.serializer())
-                            VoiceOpCode.SelectProtocol -> decodeSerializableElement(descriptor, index, SelectProtocol.serializer())
                             VoiceOpCode.SessionDescription -> decodeSerializableElement(descriptor, index, SessionDescription.serializer())
-                            VoiceOpCode.Speaking -> decodeSerializableElement(descriptor, index, Speak.serializer())
                             VoiceOpCode.Resumed -> {
                                 decoder.decodeNull()
                                 Resumed
@@ -71,16 +67,6 @@ class VoiceReady(
         val heartbeat: Int
 ) : VoiceEvent()
 
-@Serializable
-data class VoiceIdentify(
-        @SerialName("server_id")
-        val serverId: String,
-        @SerialName("user_id")
-        val userId: String,
-        @SerialName("session_id")
-        val sessionId: String,
-        val token: String
-) : VoiceEvent()
 
 @Serializable
 data class VoiceHello(@SerialName("heartbeat_interval") val heartbeatInterval: Long) : VoiceEvent()
@@ -96,16 +82,6 @@ data class VoiceHeartbeatACK(val data: Long) : VoiceEvent() {
     }
 }
 
-@Serializable
-data class VoiceHeartbeat(val data: Long) : VoiceEvent() {
-    @Serializer(VoiceHeartbeat::class)
-    companion object : DeserializationStrategy<VoiceHeartbeat> {
-        override val descriptor: SerialDescriptor
-            get() = PrimitiveDescriptor("VoiceHeartbeatEvent", PrimitiveKind.LONG)
-
-        override fun deserialize(decoder: Decoder) = VoiceHeartbeat(decoder.decodeLong())
-    }
-}
 
 
 @Serializable
@@ -114,23 +90,5 @@ data class SessionDescription(
         @SerialName("secret_key")
         val secretKey: List<Int>
 ) : VoiceEvent()
-
-@Serializable
-data class SelectProtocol(val protocol: String, val data: SelectProtocolData) : VoiceEvent()
-
-@Serializable
-data class SelectProtocolData(
-        val address: String,
-        val port: Int,
-        val mode: String
-)
-
-@Serializable
-data class Speak(
-        val speaking: Int,
-        val delay: Int,
-        val ssrc: Int
-) : VoiceEvent()
-
 
 object Resumed : VoiceEvent()
