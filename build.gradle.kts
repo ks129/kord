@@ -56,8 +56,17 @@ subprojects {
         testRuntimeOnly(Dependencies.sl4j)
     }
 
-    val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
-    compileKotlin.kotlinOptions.jvmTarget = Jvm.target
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions.jvmTarget = Jvm.target
+        kotlinOptions.freeCompilerArgs = listOf(
+                CompilerArguments.inlineClasses,
+                CompilerArguments.coroutines,
+                CompilerArguments.time,
+                CompilerArguments.unstableDefault,
+                CompilerArguments.stdLib
+
+        )
+    }
 
     tasks.withType<Test> {
         useJUnitPlatform {

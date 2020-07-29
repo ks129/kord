@@ -9,14 +9,3 @@ dependencies {
     testImplementation(Dependencies.`ktor-client-mock`)
     testImplementation(Dependencies.`ktor-client-mock-jvm`)
 }
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = Jvm.target
-        freeCompilerArgs = listOf(
-                CompilerArguments.inlineClasses,
-                CompilerArguments.coroutines,
-                CompilerArguments.time
-        )
-    }
-}
